@@ -17,6 +17,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   label = 'Image',
   required = false,
 }) => {
+  const { showError } = useNotification();
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);

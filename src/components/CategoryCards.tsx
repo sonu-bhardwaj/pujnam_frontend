@@ -54,7 +54,7 @@ export const CategoryCards: React.FC = () => {
           Shop Product by <span className="text-[#FF8C00]">Category</span>
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5">
-          {displayCategories.map((category, index) => {
+          {displayCategories.map((category) => {
             const products = categoryProducts[category.id] || [];
             const categoryImage = category.image_url || category.image;
             const productImage = products.length > 0

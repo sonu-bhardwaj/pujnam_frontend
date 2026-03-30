@@ -9,9 +9,25 @@ interface ApiResponse<T> {
 
 interface ApiCallOptions extends RequestInit {
     suppressErrorStatuses?: number[];
+    cacheTtlMs?: number;
+    skipCache?: boolean;
 }
 
 const AUTH_SESSION_HINT_KEY = 'pujnam-auth-session';
+const GET_CACHE_TTL_BY_PREFIX: Array<[string, number]> = [
+    ['/settings', 5 * 60_000],
+    ['/categories', 5 * 60_000],
+    ['/products', 60_000],
+    ['/banners', 60_000],
+    ['/promo-blocks', 60_000],
+    ['/section-videos', 60_000],
+    ['/festivals', 60_000],
+    ['/panchang/today', 10 * 60_000],
+    ['/coupons/active', 60_000],
+];
+
+const responseCache = new Map<string, { expiresAt: number; value: unknown }>();
+const inflightGetRequests = new Map<string, Promise<ApiResponse<unknown>>>();
 
 function getStoredAuthHint(): boolean {
     try {
@@ -67,72 +83,129 @@ function sanitizeForConsole(value: unknown): unknown {
     return value;
 }
 
+function getCacheKey(endpoint: string, options: RequestInit): string {
+    const method = (options.method || 'GET').toUpperCase();
+    return `${method}:${endpoint}`;
+}
+
+function getDefaultCacheTtl(endpoint: string): number {
+    for (const [prefix, ttl] of GET_CACHE_TTL_BY_PREFIX) {
+        if (endpoint.startsWith(prefix)) {
+            return ttl;
+        }
+    }
+    return 0;
+}
+
+function invalidateResponseCache() {
+    responseCache.clear();
+}
+
 // Helper function for API calls
 async function apiCall<T>(
     endpoint: string,
     options: ApiCallOptions = {}
 ): Promise<ApiResponse<T>> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const method = (options.method || 'GET').toUpperCase();
+    const cacheTtlMs = options.cacheTtlMs ?? getDefaultCacheTtl(endpoint);
+    const cacheKey = getCacheKey(endpoint, options);
+    const shouldDeduplicateGet = method === 'GET' && !options.skipCache;
+    const shouldUseCache = shouldDeduplicateGet && cacheTtlMs > 0;
 
-    try {
-        const fullUrl = `${API_BASE_URL}${endpoint}`;
-        const { suppressErrorStatuses = [], ...requestOptions } = options;
-
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json',
-            ...requestOptions.headers,
-        };
-
-        const response = await fetch(fullUrl, {
-            ...requestOptions,
-            headers,
-            credentials: 'include',
-            signal: controller.signal,
-        });
-
-        // Handle non-JSON responses
-        let data;
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            data = await response.json();
-        } else {
-            const text = await response.text();
-            try {
-                data = JSON.parse(text);
-            } catch {
-                data = { error: text || 'Invalid response format' };
-            }
+    if (shouldDeduplicateGet) {
+        const cachedEntry = responseCache.get(cacheKey);
+        if (shouldUseCache && cachedEntry && cachedEntry.expiresAt > Date.now()) {
+            return cachedEntry.value as ApiResponse<T>;
         }
 
-        if (!response.ok) {
-            if (!suppressErrorStatuses.includes(response.status)) {
-                console.error('API Error:', endpoint, response.status, sanitizeForConsole(data));
-            }
-            const errorMessage = data?.error || data?.message || 'An error occurred';
-            return { error: errorMessage };
+        const inflightRequest = inflightGetRequests.get(cacheKey);
+        if (inflightRequest) {
+            return inflightRequest as Promise<ApiResponse<T>>;
         }
-
-        return { data };
-    } catch (error) {
-        const errorMessage =
-            error instanceof DOMException && error.name === 'AbortError'
-                ? 'Request timeout. Please try again.'
-                : error instanceof Error
-                    ? error.message
-                    : 'Network error';
-        console.error('API call failed:', endpoint, errorMessage);
-        return { error: errorMessage };
-    } finally {
-        clearTimeout(timeoutId);
     }
+
+    const requestPromise = (async () => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+        try {
+            const fullUrl = `${API_BASE_URL}${endpoint}`;
+            const { suppressErrorStatuses = [], cacheTtlMs: _cacheTtlMs, skipCache: _skipCache, ...requestOptions } = options;
+
+            const headers: HeadersInit = {
+                'Content-Type': 'application/json',
+                ...requestOptions.headers,
+            };
+
+            const response = await fetch(fullUrl, {
+                ...requestOptions,
+                headers,
+                credentials: 'include',
+                signal: controller.signal,
+            });
+
+            // Handle non-JSON responses
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                try {
+                    data = JSON.parse(text);
+                } catch {
+                    data = { error: text || 'Invalid response format' };
+                }
+            }
+
+            if (!response.ok) {
+                if (!suppressErrorStatuses.includes(response.status)) {
+                    console.error('API Error:', endpoint, response.status, sanitizeForConsole(data));
+                }
+                const errorMessage = data?.error || data?.message || 'An error occurred';
+                return { error: errorMessage };
+            }
+
+            return { data };
+        } catch (error) {
+            const errorMessage =
+                error instanceof DOMException && error.name === 'AbortError'
+                    ? 'Request timeout. Please try again.'
+                    : error instanceof Error
+                        ? error.message
+                        : 'Network error';
+            console.error('API call failed:', endpoint, errorMessage);
+            return { error: errorMessage };
+        } finally {
+            clearTimeout(timeoutId);
+            if (shouldDeduplicateGet) {
+                inflightGetRequests.delete(cacheKey);
+            }
+        }
+    })();
+
+    if (shouldDeduplicateGet) {
+        inflightGetRequests.set(cacheKey, requestPromise as Promise<ApiResponse<unknown>>);
+    } else if (method !== 'GET') {
+        invalidateResponseCache();
+    }
+
+    const result = await requestPromise;
+    if (shouldUseCache && result.data) {
+        responseCache.set(cacheKey, {
+            expiresAt: Date.now() + cacheTtlMs,
+            value: result,
+        });
+    }
+
+    return result;
 }
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 // Auth API
 export const authApi = {
     async login(email: string, password: string) {
-        const response = await apiCall<{ user: any }>('/auth/login', {
+        const response = await apiCall<{ user: any; requiresVerification?: boolean; email?: string }>('/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email: normalizeEmail(email), password }),
         });

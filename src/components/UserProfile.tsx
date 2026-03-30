@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, MapPin, Plus, Edit, Trash2, Check, X, Home, Briefcase, Map } from 'lucide-react';
+import { User, MapPin, Plus, Edit, Trash2, Home, Briefcase, Map } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { useNotification } from '../contexts/NotificationContext';
 import { AnnouncementBar } from './AnnouncementBar';
@@ -82,6 +82,10 @@ export const UserProfile: React.FC = () => {
     try {
       if (editingAddress) {
         const addressId = editingAddress._id || editingAddress.id;
+        if (!addressId) {
+          showError('Address ID is missing');
+          return;
+        }
         await authApi.updateAddress(addressId, formData);
         showSuccess('Address updated successfully!');
       } else {

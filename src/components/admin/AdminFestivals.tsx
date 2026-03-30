@@ -169,14 +169,6 @@ export const AdminFestivals: React.FC = () => {
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getProductName = (productId: string | Product) => {
-    if (typeof productId === 'string') {
-      const product = products.find((p) => (p.id || p._id) === productId);
-      return product?.name || 'Unknown Product';
-    }
-    return productId.name;
-  };
-
   if (loading) {
     return <div className="text-center py-8">Loading festivals...</div>;
   }

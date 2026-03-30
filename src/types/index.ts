@@ -17,7 +17,6 @@ export interface Category {
 }
 
 export interface Product {
-  [x: string]: boolean | undefined;
   id: string;
   _id?: string;
   name: string;
@@ -36,7 +35,9 @@ export interface Product {
   low_stock_threshold?: number;
   featured?: boolean;
   is_featured?: boolean;
+  isFeatured?: boolean;
   is_bestseller?: boolean;
+  isBestseller?: boolean;
   is_active?: boolean;
   isActive?: boolean;
   deity?: string;

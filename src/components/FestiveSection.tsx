@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flame, BookOpen, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { festivalsApi } from '../lib/api';
 
 interface Festival {

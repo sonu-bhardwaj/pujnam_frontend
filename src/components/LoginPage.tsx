@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, MessageCircle, Mail, LogIn, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, MessageCircle, LogIn, Eye, EyeOff } from 'lucide-react';
 import { authApi } from '../lib/api';
 import { useNotification } from '../contexts/NotificationContext';
 import { AnnouncementBar } from './AnnouncementBar';
@@ -8,7 +8,7 @@ import { Header } from './Header';
 import { Footer } from './Footer';
 
 export const LoginPage: React.FC = () => {
-  const { showSuccess, showError, showInfo } = useNotification();
+  const { showSuccess, showError } = useNotification();
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [showOtpInput, setShowOtpInput] = useState(false);
@@ -221,7 +221,7 @@ export const LoginPage: React.FC = () => {
     }
 
     try {
-      const { data, error } = await authApi.forgotPassword(forgotPasswordEmail);
+      const { error } = await authApi.forgotPassword(forgotPasswordEmail);
       if (error) {
         setLoginError(error);
         showError(error);
@@ -311,7 +311,7 @@ export const LoginPage: React.FC = () => {
     }
 
     try {
-      const { data, error } = await authApi.resetPassword(forgotPasswordEmail, forgotPasswordOTP, newPassword);
+      const { error } = await authApi.resetPassword(forgotPasswordEmail, forgotPasswordOTP, newPassword);
       if (error) {
         setLoginError(error);
         setIsLoading(false);
@@ -399,6 +399,7 @@ export const LoginPage: React.FC = () => {
                         value={forgotPasswordEmail}
                         onChange={(e) => setForgotPasswordEmail(e.target.value)}
                         placeholder="your@email.com"
+                        autoComplete="email"
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
                       />
@@ -445,6 +446,7 @@ export const LoginPage: React.FC = () => {
                         value={forgotPasswordOTP}
                         onChange={(e) => setForgotPasswordOTP(e.target.value.replace(/\D/g, '').slice(0, 6))}
                         placeholder="Enter 6-digit OTP"
+                        autoComplete="one-time-code"
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00] text-center text-2xl tracking-widest"
                       />
@@ -499,6 +501,7 @@ export const LoginPage: React.FC = () => {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Enter new password (min 6 characters)"
+                          autoComplete="new-password"
                           required
                           minLength={6}
                           className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
@@ -517,6 +520,7 @@ export const LoginPage: React.FC = () => {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Confirm new password"
+                          autoComplete="new-password"
                           required
                           minLength={6}
                           className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
@@ -615,6 +619,7 @@ export const LoginPage: React.FC = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your@email.com"
+                        autoComplete="email"
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
                       />
@@ -627,6 +632,7 @@ export const LoginPage: React.FC = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Enter your password"
+                          autoComplete="current-password"
                           required
                           className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
                         />
@@ -673,6 +679,7 @@ export const LoginPage: React.FC = () => {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Enter your full name"
+                        autoComplete="name"
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
                       />
@@ -684,6 +691,7 @@ export const LoginPage: React.FC = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="your@email.com"
+                        autoComplete="email"
                         required
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
                       />
@@ -695,6 +703,7 @@ export const LoginPage: React.FC = () => {
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
                         placeholder="10 digit phone number"
+                        autoComplete="tel"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"
                       />
                     </div>
@@ -706,6 +715,7 @@ export const LoginPage: React.FC = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           placeholder="Minimum 6 characters"
+                          autoComplete="new-password"
                           required
                           minLength={6}
                           className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg outline-none focus:border-[#FF8C00]"

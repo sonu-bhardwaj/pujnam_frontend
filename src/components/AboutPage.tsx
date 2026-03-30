@@ -1,6 +1,5 @@
 import React from 'react';
-import { Users, MapPin, Calendar, Film, Award, Heart, Target, Shield } from 'lucide-react';
-import { useSettings } from '../contexts/SettingsContext';
+import { Calendar, Film, Award, Heart, Target, Shield } from 'lucide-react';
 import { AnnouncementBar } from './AnnouncementBar';
 // import { PanchangBar } from './PanchangBar';
 import { Header } from './Header';
@@ -8,8 +7,6 @@ import { Footer } from './Footer';
 import { CartDrawer } from './CartDrawer';
 
 export const AboutPage: React.FC = () => {
-  const { settings } = useSettings();
-
   React.useEffect(() => {
     // Handle hash navigation to scroll to sections
     const scrollToSection = () => {

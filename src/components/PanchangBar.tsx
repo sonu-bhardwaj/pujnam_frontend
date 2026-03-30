@@ -64,7 +64,7 @@ export const PanchangBar: React.FC = () => {
   const [panchang, setPanchang] = useState<PanchangData>(defaultPanchang);
   const [location, setLocation] = useState('Dadri');
   const [loading, setLoading] = useState(false);
-  const [locationPermission, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
+  const [, setLocationPermission] = useState<'granted' | 'denied' | 'prompt'>('prompt');
 
   useEffect(() => {
     const fetchPanchangFromLocation = async () => {
@@ -97,7 +97,7 @@ export const PanchangBar: React.FC = () => {
 
               // If API key not configured, silently use default values
               if (error) {
-                const errorMsg = typeof error === 'string' ? error : (error?.message || String(error) || 'Unknown error');
+                const errorMsg = typeof error === 'string' ? error : 'Unknown error';
                 if (errorMsg.includes('API key not configured') || errorMsg.includes('not available')) {
                   // Silently use default - don't log
                   setLoading(false);

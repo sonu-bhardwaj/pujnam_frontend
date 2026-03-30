@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Gift, Truck, Tag } from 'lucide-react';
+import { Truck, Tag } from 'lucide-react';
 
 const announcements = [
   { icon: Tag, text: 'Save More: Get an Additional 5% Off on Orders Over ₹1499' },

@@ -2,14 +2,11 @@ import React, { useState } from 'react';
 
 export const NewsletterSection: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Integrate with backend newsletter API
-    setSubmitted(true);
     setEmail('');
-    setTimeout(() => setSubmitted(false), 3000);
   };
 
   return (

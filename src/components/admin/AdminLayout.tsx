@@ -376,6 +376,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ onClose = () => {} }) 
                   required
                   value={loginData.email}
                   onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                  autoComplete="email"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
                   placeholder="Enter email"
                 />
@@ -389,6 +390,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ onClose = () => {} }) 
                     required
                     value={loginData.password}
                     onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                    autoComplete="current-password"
                     className="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
                     placeholder="Enter password"
                   />
