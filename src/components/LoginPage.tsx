@@ -76,7 +76,7 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      if (data?.user || data?.token) {
+      if (data?.user) {
         showSuccess('Login successful! Welcome back!');
         
         // Redirect to return URL or home
@@ -135,7 +135,7 @@ export const LoginPage: React.FC = () => {
         setRequiresVerification(true);
         setVerificationEmail(email);
         setIsLoading(false);
-      } else if (data?.user || data?.token) {
+      } else if (data?.user) {
         // Redirect to return URL or home
         const returnUrl = sessionStorage.getItem('returnUrl');
         if (returnUrl) {
@@ -190,7 +190,7 @@ export const LoginPage: React.FC = () => {
         return;
       }
 
-      if (data?.user || data?.token) {
+      if (data?.user) {
         showSuccess('Email verified successfully! Welcome!');
         
         // Redirect to return URL or home

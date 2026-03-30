@@ -132,22 +132,22 @@ const normalizeEmail = (email: string) => email.trim().toLowerCase();
 // Auth API
 export const authApi = {
     async login(email: string, password: string) {
-        const response = await apiCall<{ user: any; token?: string }>('/auth/login', {
+        const response = await apiCall<{ user: any }>('/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email: normalizeEmail(email), password }),
         });
-        if (response.data?.user || response.data?.token) {
+        if (response.data?.user) {
             setStoredAuthHint();
         }
         return response;
     },
 
     async register(email: string, password: string, name: string, phone?: string) {
-        const response = await apiCall<{ user: any; token?: string }>('/auth/register', {
+        const response = await apiCall<{ user: any; requiresVerification?: boolean }>('/auth/register', {
             method: 'POST',
             body: JSON.stringify({ email: normalizeEmail(email), password, name, phone }),
         });
-        if (response.data?.user || response.data?.token) {
+        if (response.data?.user) {
             setStoredAuthHint();
         }
         return response;
@@ -184,11 +184,11 @@ export const authApi = {
     },
 
     async verifyEmail(email: string, code: string) {
-        const response = await apiCall<{ user: any; token?: string }>('/auth/verify-email', {
+        const response = await apiCall<{ user: any }>('/auth/verify-email', {
             method: 'POST',
             body: JSON.stringify({ email: normalizeEmail(email), code }),
         });
-        if (response.data?.user || response.data?.token) {
+        if (response.data?.user) {
             setStoredAuthHint();
         }
         return response;

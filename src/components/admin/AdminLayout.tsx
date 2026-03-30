@@ -104,7 +104,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ onClose = () => {} }) 
         return;
       }
 
-      if (data?.user || data?.token) {
+      if (data?.user) {
         if (data?.user?.role === 'admin') {
           setIsAuthenticated(true);
         } else {
